@@ -21,6 +21,7 @@ namespace CykelService.Mcp.Models
         public bool MissingItems { get; init; }
         public bool CustomerContacted { get; init; }
         public string? Note { get; init; }
+        public DateTime? DeliveryDate { get; init; }
     }
 
     public record MonthRevenue

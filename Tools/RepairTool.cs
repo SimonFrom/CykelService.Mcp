@@ -26,4 +26,11 @@ public class RepairTools(IRepairQueries repairs)
 
         return repairs.GetRevenueAsync(from, to, ct);
     }
+
+    [McpServerTool(Name = "unpaid_repairs", ReadOnly = true)]
+    [Description("Ubetalte reparationer der er meldt færdige.")]
+    public Task<IReadOnlyList<OpenRepair>> UnpaidRepairs(
+        [Description("Ubetalte reparationer der er meldt færdige.")]
+        CancellationToken ct)
+        => repairs.GetUnpaidRepairsAsync(ct);
 }
