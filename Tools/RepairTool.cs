@@ -33,4 +33,11 @@ public class RepairTools(IRepairQueries repairs)
         [Description("Ubetalte reparationer der er meldt færdige.")]
         CancellationToken ct)
         => repairs.GetUnpaidRepairsAsync(ct);
+
+    [McpServerTool(Name = "repairs_by_bike", ReadOnly = true)]
+    [Description("Reparationer for en specifik cykel.")]
+    public Task<IReadOnlyList<OpenRepair>> RepairsByBike(
+        [Description("Cykel-ID")] int bikeId,
+        CancellationToken ct)
+        => repairs.GetRepairsByBikeAsync(bikeId, ct);
 }

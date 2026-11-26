@@ -9,6 +9,7 @@ public interface IRepairQueries
     Task<IReadOnlyList<OpenRepair>> GetOpenRepairsAsync(CancellationToken ct);
     Task<IReadOnlyList<MonthRevenue>> GetRevenueAsync(DateOnly from, DateOnly to, CancellationToken ct);
     Task<IReadOnlyList<OpenRepair>> GetUnpaidRepairsAsync(CancellationToken ct);
+    Task<IReadOnlyList<OpenRepair>> GetRepairsByBikeAsync(int bikeId, CancellationToken ct);
 }
 
 public class RepairQueries(NpgsqlDataSource db) : IRepairQueries
@@ -87,6 +88,33 @@ public class RepairQueries(NpgsqlDataSource db) : IRepairQueries
 
         await using var conn = await db.OpenConnectionAsync(ct);
         var rows = await conn.QueryAsync<OpenRepair>(new CommandDefinition(sql, cancellationToken: ct));
+        return rows.ToList();
+    }
+
+    public async Task<IReadOnlyList<OpenRepair>> GetRepairsByBikeAsync(int bikeId, CancellationToken ct)
+    {
+        const string sql = """
+            select r.id,
+                   c.first_name || ' ' || c.last_name as customer_name,
+                   c.phone_number,
+                   b.make || ' ' || b.model as bike,
+                   r.intake_date,
+                   r.delivery_date,
+                   r.total_price,
+                   r.missing_items,
+                   r."customerContacted" as customer_contacted,
+                   r.note
+            from repairs r
+            join customers c on c.id = r.customer_id
+            join bikes b on b.id = r.bike_id
+            where b.id = @BikeId
+            order by r.intake_date
+            """;
+
+        await using var conn = await db.OpenConnectionAsync(ct);
+        var rows = await conn.QueryAsync<OpenRepair>(new CommandDefinition(sql,
+            new { BikeId = bikeId },
+            cancellationToken: ct));
         return rows.ToList();
     }
 }
